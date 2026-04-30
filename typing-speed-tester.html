@@ -1,635 +1,543 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Typing Speed Tester</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
   <style>
-    :root {
-      --bg: #080c14;
-      --panel: #0d1520;
-      --border: #1a2e4a;
-      --accent: #00e5ff;
-      --accent2: #00ff88;
-      --danger: #ff3b5c;
-      --text: #c8d8e8;
-      --dim: #4a6080;
-      --glow: 0 0 20px rgba(0,229,255,0.3);
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #f0ede8;
+      --card:     #ffffff;
+      --ink:      #1a1612;
+      --muted:    #8a8078;
+      --accent:   #e85d26;
+      --accent2:  #2563eb;
+      --green:    #16a34a;
+      --red:      #dc2626;
+      --border:   #ddd8d0;
+      --shadow:   0 8px 40px rgba(0,0,0,0.10);
+      --radius:   18px;
+    }
 
     body {
-      font-family: 'Rajdhani', sans-serif;
+      font-family: 'Syne', sans-serif;
       background: var(--bg);
-      color: var(--text);
       min-height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      overflow: hidden;
+      justify-content: center;
+      padding: 24px;
     }
 
-    /* Grid background */
+    /* Decorative background dots */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background-image:
-        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
+      background-image: radial-gradient(circle, #c9c2b8 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.4;
       pointer-events: none;
+      z-index: 0;
     }
 
-    /* Glow orbs */
-    body::after {
-      content: '';
-      position: fixed;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
-      top: -150px;
-      left: -150px;
-      pointer-events: none;
-    }
-
-    .container {
-      width: 660px;
+    .wrapper {
       position: relative;
       z-index: 1;
-      padding: 20px;
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     /* Header */
     .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
+      text-align: center;
     }
-
-    .title {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 22px;
-      color: var(--accent);
-      text-shadow: 0 0 15px rgba(0,229,255,0.6);
-      letter-spacing: 2px;
-    }
-
-    .title span {
-      color: var(--dim);
-      font-size: 13px;
-      display: block;
-      letter-spacing: 4px;
-      margin-top: 2px;
-    }
-
-    .badge {
-      font-family: 'Share Tech Mono', monospace;
+    .header .tag {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
       font-size: 11px;
-      color: var(--accent2);
-      border: 1px solid var(--accent2);
-      padding: 4px 10px;
-      border-radius: 3px;
+      font-weight: 700;
       letter-spacing: 2px;
-      box-shadow: 0 0 10px rgba(0,255,136,0.2);
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 100px;
+      margin-bottom: 12px;
+    }
+    .header h1 {
+      font-size: clamp(28px, 6vw, 42px);
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+    .header h1 span { color: var(--accent); }
+    .header p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 400;
     }
 
-    /* Stats bar */
-    .stats-bar {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
+    /* Card */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1.5px solid var(--border);
+      padding: 32px 32px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
     }
 
-    .stat-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 16px;
+    /* Sentence display */
+    .sentence-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .sentence-box {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 15px;
+      color: var(--ink);
+      line-height: 1.7;
+      letter-spacing: 0.3px;
+      user-select: none;
       position: relative;
       overflow: hidden;
     }
-
-    .stat-card::before {
-      content: '';
+    .sentence-box::before {
+      content: '"';
       position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-    }
-
-    .stat-card.timer::before { background: linear-gradient(90deg, var(--accent), transparent); }
-    .stat-card.wpm-card::before { background: linear-gradient(90deg, var(--accent2), transparent); }
-    .stat-card.acc-card::before { background: linear-gradient(90deg, #a855f7, transparent); }
-
-    .stat-label {
-      font-size: 10px;
-      letter-spacing: 3px;
-      color: var(--dim);
-      text-transform: uppercase;
-      font-family: 'Share Tech Mono', monospace;
-      margin-bottom: 4px;
-    }
-
-    .stat-value {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 32px;
-      font-weight: 700;
+      top: -8px;
+      left: 12px;
+      font-size: 60px;
+      color: var(--border);
+      font-family: Georgia, serif;
       line-height: 1;
+      pointer-events: none;
     }
 
-    .timer .stat-value { color: var(--accent); text-shadow: 0 0 15px rgba(0,229,255,0.5); }
-    .wpm-card .stat-value { color: var(--accent2); text-shadow: 0 0 15px rgba(0,255,136,0.5); }
-    .acc-card .stat-value { color: #c084fc; text-shadow: 0 0 15px rgba(168,85,247,0.5); }
-
-    .stat-unit {
+    /* Selector */
+    .selector-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .selector-row label {
       font-size: 11px;
-      color: var(--dim);
-      font-family: 'Share Tech Mono', monospace;
-      margin-top: 2px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
     }
-
-    /* Text display */
-    .text-panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
+    .selector-row select {
+      flex: 1;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1.5px solid var(--border);
       border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 14px;
-      position: relative;
-      min-height: 90px;
-    }
-
-    .text-panel::before {
-      content: 'SAMPLE TEXT';
-      position: absolute;
-      top: -9px;
-      left: 16px;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 3px;
-      color: var(--dim);
-      background: var(--panel);
-      padding: 0 8px;
-    }
-
-    #textDisplay {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 16px;
-      line-height: 1.8;
-      color: var(--dim);
-      letter-spacing: 0.5px;
-    }
-
-    #textDisplay span.correct {
-      color: var(--accent2);
-      text-shadow: 0 0 8px rgba(0,255,136,0.4);
-    }
-
-    #textDisplay span.wrong {
-      color: var(--danger);
-      text-shadow: 0 0 8px rgba(255,59,92,0.4);
-      background: rgba(255,59,92,0.1);
-      border-radius: 2px;
-    }
-
-    #textDisplay span.current {
-      color: var(--accent);
-      border-bottom: 2px solid var(--accent);
-      animation: blink 1s steps(1) infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { border-color: var(--accent); }
-      50% { border-color: transparent; }
-    }
-
-    /* Input area */
-    .input-panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 18px;
-      margin-bottom: 14px;
-      position: relative;
+      padding: 8px 12px;
+      cursor: pointer;
+      outline: none;
       transition: border-color 0.2s;
     }
+    .selector-row select:focus { border-color: var(--accent); }
 
-    .input-panel:focus-within {
-      border-color: var(--accent);
-      box-shadow: var(--glow);
-    }
-
-    .input-panel::before {
-      content: 'YOUR INPUT';
-      position: absolute;
-      top: -9px;
-      left: 16px;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 3px;
-      color: var(--dim);
-      background: var(--panel);
-      padding: 0 8px;
-    }
-
-    #inputArea {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 15px;
-      color: var(--text);
-      resize: none;
-      height: 70px;
-      caret-color: var(--accent);
-    }
-
-    #inputArea::placeholder {
-      color: var(--dim);
-      font-size: 13px;
+    /* Input */
+    .input-label {
+      font-size: 11px;
+      font-weight: 700;
       letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    textarea {
+      width: 100%;
+      font-family: 'DM Mono', monospace;
+      font-size: 15px;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      resize: none;
+      height: 100px;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      line-height: 1.7;
+    }
+    textarea:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
+    }
+    textarea:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
-    /* Progress bar */
-    .progress-wrap {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      height: 6px;
-      margin-bottom: 14px;
-      overflow: hidden;
+    /* Timer display */
+    .timer-display {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
     }
-
-    #progressBar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 4px;
-      transition: width 0.2s ease;
-      box-shadow: 0 0 10px rgba(0,229,255,0.5);
+    .timer-display .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .timer-display .dot.active { background: var(--accent); animation: pulse 1s infinite; }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+    .timer-display .time-val {
+      font-weight: 500;
+      color: var(--ink);
+      font-size: 15px;
+      min-width: 40px;
     }
 
     /* Buttons */
     .btn-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
       gap: 12px;
     }
-
     button {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 13px;
-      letter-spacing: 3px;
-      padding: 14px;
-      border: 1px solid;
-      border-radius: 6px;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: all 0.2s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    #restartBtn {
-      background: transparent;
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    #restartBtn:hover {
-      background: rgba(0,229,255,0.1);
-      box-shadow: var(--glow);
-    }
-
-    #newTextBtn {
-      background: transparent;
-      border-color: var(--accent2);
-      color: var(--accent2);
-    }
-
-    #newTextBtn:hover {
-      background: rgba(0,255,136,0.1);
-      box-shadow: 0 0 20px rgba(0,255,136,0.3);
-    }
-
-    /* Timer low warning */
-    .timer.warning .stat-value {
-      color: var(--danger);
-      text-shadow: 0 0 15px rgba(255,59,92,0.6);
-      animation: pulse 0.5s ease infinite alternate;
-    }
-
-    @keyframes pulse {
-      from { opacity: 1; }
-      to { opacity: 0.6; }
-    }
-
-    /* Result overlay */
-    .result-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(8,12,20,0.92);
-      z-index: 100;
-      justify-content: center;
-      align-items: center;
-      backdrop-filter: blur(4px);
-    }
-
-    .result-overlay.show { display: flex; }
-
-    .result-box {
-      background: var(--panel);
-      border: 1px solid var(--accent);
-      border-radius: 12px;
-      padding: 40px 48px;
-      text-align: center;
-      box-shadow: 0 0 60px rgba(0,229,255,0.2);
-      animation: slideUp 0.4s ease;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(30px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .result-title {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 12px;
-      letter-spacing: 5px;
-      color: var(--dim);
-      margin-bottom: 16px;
-    }
-
-    .result-wpm {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 72px;
-      color: var(--accent);
-      text-shadow: 0 0 30px rgba(0,229,255,0.6);
-      line-height: 1;
-    }
-
-    .result-wpm span {
-      font-size: 16px;
-      color: var(--dim);
-      display: block;
-      margin-top: 4px;
-    }
-
-    .result-stats {
-      display: flex;
-      gap: 32px;
-      justify-content: center;
-      margin: 24px 0;
-      padding: 20px 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .result-stat {
-      font-family: 'Share Tech Mono', monospace;
-    }
-
-    .result-stat .val {
-      font-size: 28px;
-      color: var(--accent2);
-    }
-
-    .result-stat .lbl {
-      font-size: 10px;
-      color: var(--dim);
-      letter-spacing: 2px;
-    }
-
-    .result-close {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border: none;
-      color: #080c14;
+      flex: 1;
+      font-family: 'Syne', sans-serif;
       font-weight: 700;
-      padding: 14px 40px;
-      border-radius: 6px;
-      margin-top: 8px;
-      width: 100%;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 12px;
-      letter-spacing: 3px;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 20px;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .btn-start {
+      background: var(--ink);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(26,22,18,0.18);
+    }
+    .btn-start:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(26,22,18,0.28); }
+
+    .btn-finish {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(232,93,38,0.22);
+    }
+    .btn-finish:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(232,93,38,0.36); }
+
+    .btn-reset {
+      background: var(--bg);
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      flex: 0 0 auto;
+      padding: 14px 18px;
+    }
+    .btn-reset:hover:not(:disabled) { background: var(--border); }
+
+    /* Result */
+    .result {
+      border-radius: 14px;
+      padding: 20px 22px;
+      display: none;
+      align-items: center;
+      gap: 16px;
+      animation: slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .result.correct {
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      display: flex;
+    }
+    .result.wrong {
+      background: #fef2f2;
+      border: 1.5px solid #fecaca;
+      display: flex;
+    }
+    .result-icon {
+      font-size: 32px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .result-text strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+    .result.correct .result-text strong { color: var(--green); }
+    .result.wrong  .result-text strong { color: var(--red); }
+    .result-text span {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
     }
 
-    .result-close:hover { opacity: 0.85; }
+    /* Stats row */
+    .stats {
+      display: none;
+      gap: 12px;
+    }
+    .stats.show { display: flex; }
+    .stat-card {
+      flex: 1;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .stat-card .s-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .stat-card .s-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
 
-<div class="result-overlay" id="resultOverlay">
-  <div class="result-box">
-    <div class="result-title">// TEST COMPLETE</div>
-    <div class="result-wpm" id="resultWPM">0<span>WPM</span></div>
-    <div class="result-stats">
-      <div class="result-stat">
-        <div class="val" id="resultAcc">0%</div>
-        <div class="lbl">ACCURACY</div>
-      </div>
-      <div class="result-stat">
-        <div class="val" id="resultChars">0</div>
-        <div class="lbl">CHARS</div>
-      </div>
-      <div class="result-stat">
-        <div class="val" id="resultErrors">0</div>
-        <div class="lbl">ERRORS</div>
-      </div>
-    </div>
-    <button class="result-close" onclick="restartTest()">RESTART TEST</button>
-  </div>
-</div>
+<div class="wrapper">
 
-<div class="container">
+  <!-- Header -->
   <div class="header">
-    <div class="title">
-      TYPEX
-      <span>SPEED TERMINAL</span>
+    <div class="tag">⌨ Student Tool</div>
+    <h1>Typing <span>Speed</span> Tester</h1>
+    <p>Test your accuracy and how fast you can type.</p>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <!-- Sentence Selector -->
+    <div>
+      <div class="sentence-label">Choose a Sentence</div>
+      <div class="selector-row">
+        <label>Set →</label>
+        <select id="sentenceSelect" onchange="changeSentence()">
+          <option value="0">Easy — Quick brown fox</option>
+          <option value="1">Medium — Practice makes perfect</option>
+          <option value="2">Medium — Keyboard typing</option>
+          <option value="3">Hard — Education & success</option>
+          <option value="4">Hard — Technology & learning</option>
+        </select>
+      </div>
     </div>
-    <div class="badge">⌨ ACTIVE</div>
-  </div>
 
-  <div class="stats-bar">
-    <div class="stat-card timer" id="timerCard">
-      <div class="stat-label">⏱ TIME LEFT</div>
-      <div class="stat-value" id="time">60</div>
-      <div class="stat-unit">SECONDS</div>
+    <!-- Sentence Display -->
+    <div>
+      <div class="sentence-label">Type This Sentence</div>
+      <div class="sentence-box" id="sentenceBox">
+        The quick brown fox jumps over the lazy dog.
+      </div>
     </div>
-    <div class="stat-card wpm-card">
-      <div class="stat-label">⚡ SPEED</div>
-      <div class="stat-value" id="wpm">0</div>
-      <div class="stat-unit">WPM</div>
+
+    <!-- Input -->
+    <div>
+      <div class="input-label">Your Input</div>
+      <textarea id="userInput" placeholder="Click START, then begin typing here…" disabled></textarea>
     </div>
-    <div class="stat-card acc-card">
-      <div class="stat-label">🎯 ACCURACY</div>
-      <div class="stat-value" id="accuracy">100</div>
-      <div class="stat-unit">PERCENT</div>
+
+    <!-- Timer -->
+    <div class="timer-display">
+      <div class="dot" id="timerDot"></div>
+      <span>Time elapsed:</span>
+      <span class="time-val" id="timerVal">0.0s</span>
     </div>
+
+    <!-- Buttons -->
+    <div class="btn-row">
+      <button class="btn-start" id="btnStart" onclick="startTest()">▶ Start</button>
+      <button class="btn-finish" id="btnFinish" onclick="finishTest()" disabled>■ Finish</button>
+      <button class="btn-reset" id="btnReset" onclick="resetTest()" title="Reset">↺</button>
+    </div>
+
+    <!-- Result -->
+    <div class="result" id="result">
+      <div class="result-icon" id="resultIcon"></div>
+      <div class="result-text">
+        <strong id="resultTitle"></strong>
+        <span id="resultSub"></span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats" id="statsRow">
+      <div class="stat-card">
+        <div class="s-val" id="statTime">—</div>
+        <div class="s-lbl">Seconds</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-val" id="statChars">—</div>
+        <div class="s-lbl">Characters</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-val" id="statWPM">—</div>
+        <div class="s-lbl">Est. WPM</div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="text-panel">
-    <div id="textDisplay"></div>
-  </div>
-
-  <div class="progress-wrap">
-    <div id="progressBar"></div>
-  </div>
-
-  <div class="input-panel">
-    <textarea id="inputArea" placeholder="// FOCUS HERE AND START TYPING..."></textarea>
-  </div>
-
-  <div class="btn-row">
-    <button id="restartBtn" onclick="restartTest()">⟳ RESTART</button>
-    <button id="newTextBtn" onclick="loadNewText()">⇄ NEW TEXT</button>
-  </div>
+  <div class="footer">Press <strong>Start</strong> to begin · <strong>Finish</strong> when done · <strong>↺</strong> to reset</div>
 </div>
 
 <script>
-  const texts = [
-    "Typing speed is an important skill for students and professionals. Practice daily to improve your speed and accuracy.",
-    "The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet at least once.",
-    "Technology is reshaping the world at an unprecedented pace. Adaptability and continuous learning are the keys to success.",
-    "A good programmer writes code that humans can understand. Clean, readable, and efficient code is always better than clever tricks.",
-    "Speed comes from consistency, not shortcuts. Build the habit of typing without looking at the keyboard to improve your overall performance."
+  const sentences = [
+    "The quick brown fox jumps over the lazy dog.",
+    "Practice makes perfect, so keep on typing every day.",
+    "A good keyboard and steady hands improve your typing speed.",
+    "Education is the key to success and opens many doors in life.",
+    "Technology is changing the way students learn and grow each day."
   ];
 
-  let currentText = texts[0];
-  const textDisplay = document.getElementById("textDisplay");
-  const inputArea = document.getElementById("inputArea");
-  const timeEl = document.getElementById("time");
-  const wpmEl = document.getElementById("wpm");
-  const accEl = document.getElementById("accuracy");
-  const progressBar = document.getElementById("progressBar");
-  const timerCard = document.getElementById("timerCard");
+  let startTime = null;
+  let timerInterval = null;
+  let running = false;
 
-  let time = 60;
-  let timer = null;
-  let errorCount = 0;
-
-  function loadText(txt) {
-    textDisplay.innerHTML = "";
-    txt.split("").forEach((char, i) => {
-      const span = document.createElement("span");
-      span.innerText = char;
-      if (i === 0) span.classList.add("current");
-      textDisplay.appendChild(span);
-    });
+  function changeSentence() {
+    if (running) return;
+    const idx = document.getElementById('sentenceSelect').value;
+    document.getElementById('sentenceBox').textContent = sentences[idx];
+    resetTest(true);
   }
 
-  function loadNewText() {
-    const remaining = texts.filter(t => t !== currentText);
-    currentText = remaining[Math.floor(Math.random() * remaining.length)];
-    restartTest();
+  function startTest() {
+    resetDisplay();
+    running = true;
+    startTime = Date.now();
+
+    const input = document.getElementById('userInput');
+    input.disabled = false;
+    input.value = '';
+    input.focus();
+
+    document.getElementById('btnStart').disabled = true;
+    document.getElementById('btnFinish').disabled = false;
+    document.getElementById('sentenceSelect').disabled = true;
+
+    const dot = document.getElementById('timerDot');
+    dot.classList.add('active');
+
+    timerInterval = setInterval(() => {
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      document.getElementById('timerVal').textContent = elapsed + 's';
+    }, 100);
   }
 
-  inputArea.addEventListener("input", () => {
-    const input = inputArea.value.split("");
-    const spans = textDisplay.querySelectorAll("span");
+  function finishTest() {
+    if (!running) return;
+    running = false;
 
-    let correct = 0;
-    let errors = 0;
+    clearInterval(timerInterval);
+    const elapsed = ((Date.now() - startTime) / 1000);
+    const elapsedDisplay = elapsed.toFixed(1);
 
-    spans.forEach((span, i) => {
-      span.classList.remove("correct", "wrong", "current");
-      if (input[i] == null) {
-        // untyped
-      } else if (input[i] === span.innerText) {
-        span.classList.add("correct");
-        correct++;
-      } else {
-        span.classList.add("wrong");
-        errors++;
-      }
-    });
+    document.getElementById('timerDot').classList.remove('active');
+    document.getElementById('timerVal').textContent = elapsedDisplay + 's';
 
-    // Mark current char
-    if (input.length < spans.length) {
-      spans[input.length].classList.add("current");
+    const idx = document.getElementById('sentenceSelect').value;
+    const target = sentences[idx];
+    const typed  = document.getElementById('userInput').value.trim();
+
+    document.getElementById('userInput').disabled = true;
+    document.getElementById('btnFinish').disabled = true;
+
+    const resultEl   = document.getElementById('result');
+    const isCorrect  = typed === target;
+
+    resultEl.className = 'result ' + (isCorrect ? 'correct' : 'wrong');
+    document.getElementById('resultIcon').textContent  = isCorrect ? '✅' : '❌';
+    document.getElementById('resultTitle').textContent = isCorrect ? 'Correct!' : 'Wrong Typing!';
+    document.getElementById('resultSub').textContent   = `Time taken: ${elapsedDisplay} seconds`;
+
+    // Stats
+    const words = target.trim().split(/\s+/).length;
+    const wpm   = Math.round((words / elapsed) * 60);
+    document.getElementById('statTime').textContent  = elapsedDisplay + 's';
+    document.getElementById('statChars').textContent = typed.length;
+    document.getElementById('statWPM').textContent   = isFinite(wpm) ? wpm : '—';
+    document.getElementById('statsRow').classList.add('show');
+  }
+
+  function resetTest(silent = false) {
+    if (!silent && running) {
+      clearInterval(timerInterval);
+      running = false;
     }
+    resetDisplay();
 
-    errorCount = errors;
+    const input = document.getElementById('userInput');
+    input.value = '';
+    input.disabled = true;
 
-    // Progress
-    const pct = (input.length / spans.length) * 100;
-    progressBar.style.width = Math.min(pct, 100) + "%";
-
-    // Accuracy
-    let accuracy = input.length > 0 ? Math.round((correct / input.length) * 100) : 100;
-    accEl.innerText = accuracy;
-
-    // WPM
-    const elapsed = (60 - time) || 1;
-    let words = correct / 5;
-    let wpm = Math.round(words / (elapsed / 60));
-    wpmEl.innerText = isFinite(wpm) ? wpm : 0;
-
-    // Finished
-    if (input.length >= currentText.length) {
-      clearInterval(timer);
-      timer = null;
-      showResult();
-    }
-  });
-
-  function startTimer() {
-    timer = setInterval(() => {
-      time--;
-      timeEl.innerText = time;
-
-      if (time <= 10) {
-        timerCard.classList.add("warning");
-      }
-
-      if (time === 0) {
-        clearInterval(timer);
-        timer = null;
-        inputArea.disabled = true;
-        showResult();
-      }
-    }, 1000);
+    document.getElementById('btnStart').disabled = false;
+    document.getElementById('btnFinish').disabled = true;
+    document.getElementById('sentenceSelect').disabled = false;
+    document.getElementById('timerDot').classList.remove('active');
+    document.getElementById('timerVal').textContent = '0.0s';
+    document.getElementById('statsRow').classList.remove('show');
   }
 
-  inputArea.addEventListener("focus", () => {
-    if (!timer && time > 0 && !inputArea.disabled) startTimer();
-  });
-
-  function showResult() {
-    document.getElementById("resultWPM").childNodes[0].textContent = wpmEl.innerText;
-    document.getElementById("resultAcc").textContent = accEl.innerText + "%";
-    document.getElementById("resultChars").textContent = inputArea.value.length;
-    document.getElementById("resultErrors").textContent = errorCount;
-    document.getElementById("resultOverlay").classList.add("show");
+  function resetDisplay() {
+    const r = document.getElementById('result');
+    r.className = 'result';
+    document.getElementById('resultIcon').textContent  = '';
+    document.getElementById('resultTitle').textContent = '';
+    document.getElementById('resultSub').textContent   = '';
   }
-
-  function restartTest() {
-    document.getElementById("resultOverlay").classList.remove("show");
-    clearInterval(timer);
-    timer = null;
-    time = 60;
-    inputArea.value = "";
-    inputArea.disabled = false;
-    timeEl.innerText = time;
-    wpmEl.innerText = 0;
-    accEl.innerText = 100;
-    progressBar.style.width = "0%";
-    timerCard.classList.remove("warning");
-    errorCount = 0;
-    loadText(currentText);
-    inputArea.focus();
-  }
-
-  loadText(currentText);
 </script>
 </body>
 </html>
