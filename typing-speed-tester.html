@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Speed Tester</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080c14;
+      --panel: #0d1520;
+      --border: #1a2e4a;
+      --accent: #00e5ff;
+      --accent2: #00ff88;
+      --danger: #ff3b5c;
+      --text: #c8d8e8;
+      --dim: #4a6080;
+      --glow: 0 0 20px rgba(0,229,255,0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    /* Glow orbs */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+      top: -150px;
+      left: -150px;
+      pointer-events: none;
+    }
+
+    .container {
+      width: 660px;
+      position: relative;
+      z-index: 1;
+      padding: 20px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 22px;
+      color: var(--accent);
+      text-shadow: 0 0 15px rgba(0,229,255,0.6);
+      letter-spacing: 2px;
+    }
+
+    .title span {
+      color: var(--dim);
+      font-size: 13px;
+      display: block;
+      letter-spacing: 4px;
+      margin-top: 2px;
+    }
+
+    .badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--accent2);
+      border: 1px solid var(--accent2);
+      padding: 4px 10px;
+      border-radius: 3px;
+      letter-spacing: 2px;
+      box-shadow: 0 0 10px rgba(0,255,136,0.2);
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+
+    .stat-card.timer::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .stat-card.wpm-card::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+    .stat-card.acc-card::before { background: linear-gradient(90deg, #a855f7, transparent); }
+
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--dim);
+      text-transform: uppercase;
+      font-family: 'Share Tech Mono', monospace;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .timer .stat-value { color: var(--accent); text-shadow: 0 0 15px rgba(0,229,255,0.5); }
+    .wpm-card .stat-value { color: var(--accent2); text-shadow: 0 0 15px rgba(0,255,136,0.5); }
+    .acc-card .stat-value { color: #c084fc; text-shadow: 0 0 15px rgba(168,85,247,0.5); }
+
+    .stat-unit {
+      font-size: 11px;
+      color: var(--dim);
+      font-family: 'Share Tech Mono', monospace;
+      margin-top: 2px;
+    }
+
+    /* Text display */
+    .text-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 14px;
+      position: relative;
+      min-height: 90px;
+    }
+
+    .text-panel::before {
+      content: 'SAMPLE TEXT';
+      position: absolute;
+      top: -9px;
+      left: 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--dim);
+      background: var(--panel);
+      padding: 0 8px;
+    }
+
+    #textDisplay {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--dim);
+      letter-spacing: 0.5px;
+    }
+
+    #textDisplay span.correct {
+      color: var(--accent2);
+      text-shadow: 0 0 8px rgba(0,255,136,0.4);
+    }
+
+    #textDisplay span.wrong {
+      color: var(--danger);
+      text-shadow: 0 0 8px rgba(255,59,92,0.4);
+      background: rgba(255,59,92,0.1);
+      border-radius: 2px;
+    }
+
+    #textDisplay span.current {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      animation: blink 1s steps(1) infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { border-color: var(--accent); }
+      50% { border-color: transparent; }
+    }
+
+    /* Input area */
+    .input-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+
+    .input-panel:focus-within {
+      border-color: var(--accent);
+      box-shadow: var(--glow);
+    }
+
+    .input-panel::before {
+      content: 'YOUR INPUT';
+      position: absolute;
+      top: -9px;
+      left: 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--dim);
+      background: var(--panel);
+      padding: 0 8px;
+    }
+
+    #inputArea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 15px;
+      color: var(--text);
+      resize: none;
+      height: 70px;
+      caret-color: var(--accent);
+    }
+
+    #inputArea::placeholder {
+      color: var(--dim);
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      height: 6px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 4px;
+      transition: width 0.2s ease;
+      box-shadow: 0 0 10px rgba(0,229,255,0.5);
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    button {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 3px;
+      padding: 14px;
+      border: 1px solid;
+      border-radius: 6px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #restartBtn {
+      background: transparent;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    #restartBtn:hover {
+      background: rgba(0,229,255,0.1);
+      box-shadow: var(--glow);
+    }
+
+    #newTextBtn {
+      background: transparent;
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    #newTextBtn:hover {
+      background: rgba(0,255,136,0.1);
+      box-shadow: 0 0 20px rgba(0,255,136,0.3);
+    }
+
+    /* Timer low warning */
+    .timer.warning .stat-value {
+      color: var(--danger);
+      text-shadow: 0 0 15px rgba(255,59,92,0.6);
+      animation: pulse 0.5s ease infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 1; }
+      to { opacity: 0.6; }
+    }
+
+    /* Result overlay */
+    .result-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(8,12,20,0.92);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .result-overlay.show { display: flex; }
+
+    .result-box {
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 40px 48px;
+      text-align: center;
+      box-shadow: 0 0 60px rgba(0,229,255,0.2);
+      animation: slideUp 0.4s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .result-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 5px;
+      color: var(--dim);
+      margin-bottom: 16px;
+    }
+
+    .result-wpm {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 72px;
+      color: var(--accent);
+      text-shadow: 0 0 30px rgba(0,229,255,0.6);
+      line-height: 1;
+    }
+
+    .result-wpm span {
+      font-size: 16px;
+      color: var(--dim);
+      display: block;
+      margin-top: 4px;
+    }
+
+    .result-stats {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      margin: 24px 0;
+      padding: 20px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-stat {
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .result-stat .val {
+      font-size: 28px;
+      color: var(--accent2);
+    }
+
+    .result-stat .lbl {
+      font-size: 10px;
+      color: var(--dim);
+      letter-spacing: 2px;
+    }
+
+    .result-close {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      color: #080c14;
+      font-weight: 700;
+      padding: 14px 40px;
+      border-radius: 6px;
+      margin-top: 8px;
+      width: 100%;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .result-close:hover { opacity: 0.85; }
+  </style>
+</head>
+<body>
+
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-box">
+    <div class="result-title">// TEST COMPLETE</div>
+    <div class="result-wpm" id="resultWPM">0<span>WPM</span></div>
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="val" id="resultAcc">0%</div>
+        <div class="lbl">ACCURACY</div>
+      </div>
+      <div class="result-stat">
+        <div class="val" id="resultChars">0</div>
+        <div class="lbl">CHARS</div>
+      </div>
+      <div class="result-stat">
+        <div class="val" id="resultErrors">0</div>
+        <div class="lbl">ERRORS</div>
+      </div>
+    </div>
+    <button class="result-close" onclick="restartTest()">RESTART TEST</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div class="title">
+      TYPEX
+      <span>SPEED TERMINAL</span>
+    </div>
+    <div class="badge">⌨ ACTIVE</div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-card timer" id="timerCard">
+      <div class="stat-label">⏱ TIME LEFT</div>
+      <div class="stat-value" id="time">60</div>
+      <div class="stat-unit">SECONDS</div>
+    </div>
+    <div class="stat-card wpm-card">
+      <div class="stat-label">⚡ SPEED</div>
+      <div class="stat-value" id="wpm">0</div>
+      <div class="stat-unit">WPM</div>
+    </div>
+    <div class="stat-card acc-card">
+      <div class="stat-label">🎯 ACCURACY</div>
+      <div class="stat-value" id="accuracy">100</div>
+      <div class="stat-unit">PERCENT</div>
+    </div>
+  </div>
+
+  <div class="text-panel">
+    <div id="textDisplay"></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div id="progressBar"></div>
+  </div>
+
+  <div class="input-panel">
+    <textarea id="inputArea" placeholder="// FOCUS HERE AND START TYPING..."></textarea>
+  </div>
+
+  <div class="btn-row">
+    <button id="restartBtn" onclick="restartTest()">⟳ RESTART</button>
+    <button id="newTextBtn" onclick="loadNewText()">⇄ NEW TEXT</button>
+  </div>
+</div>
+
+<script>
+  const texts = [
+    "Typing speed is an important skill for students and professionals. Practice daily to improve your speed and accuracy.",
+    "The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet at least once.",
+    "Technology is reshaping the world at an unprecedented pace. Adaptability and continuous learning are the keys to success.",
+    "A good programmer writes code that humans can understand. Clean, readable, and efficient code is always better than clever tricks.",
+    "Speed comes from consistency, not shortcuts. Build the habit of typing without looking at the keyboard to improve your overall performance."
+  ];
+
+  let currentText = texts[0];
+  const textDisplay = document.getElementById("textDisplay");
+  const inputArea = document.getElementById("inputArea");
+  const timeEl = document.getElementById("time");
+  const wpmEl = document.getElementById("wpm");
+  const accEl = document.getElementById("accuracy");
+  const progressBar = document.getElementById("progressBar");
+  const timerCard = document.getElementById("timerCard");
+
+  let time = 60;
+  let timer = null;
+  let errorCount = 0;
+
+  function loadText(txt) {
+    textDisplay.innerHTML = "";
+    txt.split("").forEach((char, i) => {
+      const span = document.createElement("span");
+      span.innerText = char;
+      if (i === 0) span.classList.add("current");
+      textDisplay.appendChild(span);
+    });
+  }
+
+  function loadNewText() {
+    const remaining = texts.filter(t => t !== currentText);
+    currentText = remaining[Math.floor(Math.random() * remaining.length)];
+    restartTest();
+  }
+
+  inputArea.addEventListener("input", () => {
+    const input = inputArea.value.split("");
+    const spans = textDisplay.querySelectorAll("span");
+
+    let correct = 0;
+    let errors = 0;
+
+    spans.forEach((span, i) => {
+      span.classList.remove("correct", "wrong", "current");
+      if (input[i] == null) {
+        // untyped
+      } else if (input[i] === span.innerText) {
+        span.classList.add("correct");
+        correct++;
+      } else {
+        span.classList.add("wrong");
+        errors++;
+      }
+    });
+
+    // Mark current char
+    if (input.length < spans.length) {
+      spans[input.length].classList.add("current");
+    }
+
+    errorCount = errors;
+
+    // Progress
+    const pct = (input.length / spans.length) * 100;
+    progressBar.style.width = Math.min(pct, 100) + "%";
+
+    // Accuracy
+    let accuracy = input.length > 0 ? Math.round((correct / input.length) * 100) : 100;
+    accEl.innerText = accuracy;
+
+    // WPM
+    const elapsed = (60 - time) || 1;
+    let words = correct / 5;
+    let wpm = Math.round(words / (elapsed / 60));
+    wpmEl.innerText = isFinite(wpm) ? wpm : 0;
+
+    // Finished
+    if (input.length >= currentText.length) {
+      clearInterval(timer);
+      timer = null;
+      showResult();
+    }
+  });
+
+  function startTimer() {
+    timer = setInterval(() => {
+      time--;
+      timeEl.innerText = time;
+
+      if (time <= 10) {
+        timerCard.classList.add("warning");
+      }
+
+      if (time === 0) {
+        clearInterval(timer);
+        timer = null;
+        inputArea.disabled = true;
+        showResult();
+      }
+    }, 1000);
+  }
+
+  inputArea.addEventListener("focus", () => {
+    if (!timer && time > 0 && !inputArea.disabled) startTimer();
+  });
+
+  function showResult() {
+    document.getElementById("resultWPM").childNodes[0].textContent = wpmEl.innerText;
+    document.getElementById("resultAcc").textContent = accEl.innerText + "%";
+    document.getElementById("resultChars").textContent = inputArea.value.length;
+    document.getElementById("resultErrors").textContent = errorCount;
+    document.getElementById("resultOverlay").classList.add("show");
+  }
+
+  function restartTest() {
+    document.getElementById("resultOverlay").classList.remove("show");
+    clearInterval(timer);
+    timer = null;
+    time = 60;
+    inputArea.value = "";
+    inputArea.disabled = false;
+    timeEl.innerText = time;
+    wpmEl.innerText = 0;
+    accEl.innerText = 100;
+    progressBar.style.width = "0%";
+    timerCard.classList.remove("warning");
+    errorCount = 0;
+    loadText(currentText);
+    inputArea.focus();
+  }
+
+  loadText(currentText);
+</script>
+</body>
+</html>
