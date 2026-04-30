@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Typing Speed Tester</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;--bg:#f7f8ff;--bg2:#eef0ff;
+  --ink:#0f0f1a;--ink2:#3a3a5c;--muted:#8b8ba8;--border:#e2e4f0;
+  --p1:#6c63ff;--p2:#f857a6;--p3:#ff5858;--p4:#00c9a7;--p5:#f9a825;
+  --grad1:linear-gradient(135deg,#6c63ff,#f857a6);
+  --grad2:linear-gradient(135deg,#00c9a7,#6c63ff);
+  --grad3:linear-gradient(135deg,#f9a825,#f857a6);
+  --shadow:0 20px 60px rgba(108,99,255,.12);
+  --shadow2:0 8px 30px rgba(108,99,255,.18);
+  --r:20px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden}
+
+/* PAGES */
+.page{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .45s ease,transform .45s ease;transform:translateY(24px);z-index:1}
+.page.active{opacity:1;pointer-events:all;transform:translateY(0)}
+
+/* NAVBAR */
+.nav{width:100%;max-width:1100px;display:flex;align-items:center;justify-content:space-between;padding:22px 32px;position:sticky;top:0;z-index:10;background:rgba(247,248,255,.85);backdrop-filter:blur(12px)}
+.nav-logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:var(--ink);text-decoration:none}
+.nav-logo-icon{width:36px;height:36px;background:var(--grad1);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;box-shadow:0 4px 14px rgba(108,99,255,.35)}
+.nav-pill{background:var(--grad1);color:#fff;font-size:13px;font-weight:700;letter-spacing:.5px;padding:10px 22px;border-radius:100px;border:none;cursor:pointer;box-shadow:var(--shadow2);transition:transform .2s,box-shadow .2s;font-family:'Outfit',sans-serif}
+.nav-pill:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(108,99,255,.38)}
+.nav-back{background:transparent;color:var(--ink2);font-size:14px;font-weight:600;border:1.5px solid var(--border);padding:9px 18px;border-radius:100px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.nav-back:hover{border-color:var(--p1);color:var(--p1)}
+
+/* BG BLOBS */
+.blob{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+.b1{width:600px;height:600px;background:radial-gradient(circle,rgba(108,99,255,.12),transparent 70%);top:-200px;right:-100px;animation:bm1 14s ease-in-out infinite}
+.b2{width:500px;height:500px;background:radial-gradient(circle,rgba(248,87,166,.09),transparent 70%);bottom:-150px;left:-150px;animation:bm2 18s ease-in-out infinite}
+.b3{width:350px;height:350px;background:radial-gradient(circle,rgba(0,201,167,.09),transparent 70%);top:40%;left:30%;animation:bm3 20s ease-in-out infinite}
+@keyframes bm1{0%,100%{transform:translate(0,0)}50%{transform:translate(-40px,40px)}}
+@keyframes bm2{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,-30px)}}
+@keyframes bm3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-20px,20px) scale(1.15)}}
+
+/* ═══ PAGE 1: HOME ═══ */
+#page-home{justify-content:flex-start;padding-bottom:80px}
+.home-inner{position:relative;z-index:2;width:100%;max-width:1100px;padding:0 32px}
+
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;min-height:calc(100vh - 90px)}
+.hero-left{animation:fsl .7s ease both}
+@keyframes fsl{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(108,99,255,.08);border:1.5px solid rgba(108,99,255,.2);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p1);margin-bottom:28px}
+.tag-dot{width:7px;height:7px;background:var(--p1);border-radius:50%;animation:tdot 1.5s infinite}
+@keyframes tdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+
+.hero-h1{font-size:clamp(42px,6vw,68px);font-weight:900;line-height:1.05;letter-spacing:-2px;color:var(--ink);margin-bottom:22px}
+.grad-text{background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.hero-p{font-size:17px;color:var(--ink2);line-height:1.7;font-weight:400;max-width:440px;margin-bottom:40px}
+
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:48px}
+.btn-main{display:flex;align-items:center;gap:10px;background:var(--grad1);color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:16px;padding:16px 32px;border-radius:14px;border:none;cursor:pointer;box-shadow:0 8px 30px rgba(108,99,255,.35);transition:transform .2s,box-shadow .2s}
+.btn-main:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(108,99,255,.5)}
+.btn-ghost{display:flex;align-items:center;gap:8px;background:transparent;color:var(--ink2);font-family:'Outfit',sans-serif;font-weight:600;font-size:15px;padding:16px 24px;border-radius:14px;border:2px solid var(--border);cursor:pointer;transition:border-color .2s,color .2s}
+.btn-ghost:hover{border-color:var(--p1);color:var(--p1)}
+
+.hero-metrics{display:flex;gap:32px}
+.hm-val{font-size:28px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.hm-lbl{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+
+/* KEYBOARD VISUAL */
+.hero-right{display:flex;align-items:center;justify-content:center;animation:fsr .7s .15s ease both}
+@keyframes fsr{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+.kb-scene{position:relative;width:100%;max-width:500px}
+.kb-glow{position:absolute;inset:-40px;background:radial-gradient(ellipse,rgba(108,99,255,.15) 0%,transparent 70%);border-radius:50%;animation:gpulse 3s ease-in-out infinite}
+@keyframes gpulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.1);opacity:1}}
+.kb-card{background:rgba(255,255,255,.7);backdrop-filter:blur(20px);border:1.5px solid rgba(255,255,255,.9);border-radius:28px;padding:24px 20px 20px;box-shadow:0 30px 80px rgba(108,99,255,.18);position:relative;overflow:hidden}
+.kb-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(108,99,255,.04),rgba(248,87,166,.03));pointer-events:none}
+
+/* Screen */
+.kb-screen{background:linear-gradient(135deg,#0d0d28,#1a0535);border-radius:14px;padding:14px 16px;margin-bottom:18px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#a78bfa;line-height:1.6;min-height:68px;position:relative;overflow:hidden;box-shadow:inset 0 2px 8px rgba(0,0,0,.4)}
+.kb-screen::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(108,99,255,.07),transparent);animation:scan 3s linear infinite;pointer-events:none}
+@keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+.screen-txt{color:#e0d7ff}
+.kb-cur{display:inline-block;width:2px;height:13px;background:#a78bfa;margin-left:2px;animation:cblink .7s step-end infinite;vertical-align:middle}
+@keyframes cblink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Keys */
+.kb-rows{display:flex;flex-direction:column;gap:6px}
+.kb-row{display:flex;gap:5px;justify-content:center}
+.key{height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;cursor:default;transition:all .15s;user-select:none;flex-shrink:0}
+.kn{width:36px;background:rgba(255,255,255,.9);border:1.5px solid rgba(108,99,255,.12);color:var(--ink2);box-shadow:0 3px 0 rgba(108,99,255,.1),0 1px 4px rgba(0,0,0,.06)}
+.kw{width:52px;font-size:10px}
+.ksp{flex:1;max-width:200px;background:rgba(108,99,255,.06);border:1.5px solid rgba(108,99,255,.15)}
+.key.lit{background:var(--grad1)!important;color:#fff!important;border-color:transparent!important;box-shadow:0 3px 0 rgba(108,99,255,.4),0 0 20px rgba(108,99,255,.5)!important;transform:translateY(2px)!important}
+.kn:not(.lit):hover{transform:translateY(-2px);box-shadow:0 5px 0 rgba(108,99,255,.15),0 0 15px rgba(108,99,255,.15)}
+
+/* Particles */
+.kb-pts{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:28px}
+.pt{position:absolute;border-radius:50%;animation:ptrise linear forwards;pointer-events:none}
+@keyframes ptrise{0%{opacity:0;transform:translateY(0) scale(0)}15%{opacity:1}85%{opacity:.5}100%{opacity:0;transform:translateY(-110px) scale(1.8)}}
+
+/* Features */
+.features{padding:80px 0;width:100%;position:relative;z-index:2}
+.sec-label{text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--p1);margin-bottom:10px}
+.sec-title{text-align:center;font-size:clamp(28px,4vw,40px);font-weight:800;color:var(--ink);margin-bottom:50px;letter-spacing:-1px}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feat-card{background:var(--white);border-radius:var(--r);padding:28px 24px;border:1.5px solid var(--border);box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.feat-card:nth-child(1)::before{background:var(--grad1)}
+.feat-card:nth-child(2)::before{background:var(--grad2)}
+.feat-card:nth-child(3)::before{background:var(--grad3)}
+.feat-card:hover{transform:translateY(-6px);box-shadow:0 30px 70px rgba(108,99,255,.16)}
+.feat-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}
+.feat-card:nth-child(1) .feat-ico{background:rgba(108,99,255,.1)}
+.feat-card:nth-child(2) .feat-ico{background:rgba(0,201,167,.1)}
+.feat-card:nth-child(3) .feat-ico{background:rgba(249,168,37,.1)}
+.feat-ttl{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.feat-desc{font-size:14px;color:var(--muted);line-height:1.6}
+
+/* ═══ PAGE 2: TEST ═══ */
+#page-test{justify-content:flex-start;padding-bottom:60px}
+.test-wrap{width:100%;max-width:760px;padding:0 24px 40px;position:relative;z-index:2}
+
+.diff-bar{display:flex;background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:6px;gap:6px;margin-bottom:22px;box-shadow:var(--shadow)}
+.dtab{flex:1;padding:11px 16px;border-radius:12px;border:none;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;color:var(--muted);background:transparent}
+.dtab.on{background:var(--grad1);color:#fff;box-shadow:0 4px 18px rgba(108,99,255,.3)}
+.dtab:not(.on):hover{background:var(--bg2);color:var(--ink)}
+
+.lstat-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.ls{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:16px 10px;text-align:center;box-shadow:var(--shadow);transition:border-color .3s,box-shadow .3s}
+.ls.on{border-color:var(--p1);box-shadow:0 0 0 4px rgba(108,99,255,.06),var(--shadow)}
+.lsv{font-size:25px;font-weight:800;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.lsl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px}
+
+.prog-track{height:5px;background:var(--bg2);border-radius:100px;overflow:hidden;margin-bottom:18px}
+.prog-fill{height:100%;background:var(--grad1);border-radius:100px;width:0%;transition:width .3s ease;box-shadow:0 0 10px rgba(108,99,255,.4)}
+
+.sent-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;padding:26px;margin-bottom:14px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.sent-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad1)}
+.sent-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.sent-text{font-family:'JetBrains Mono',monospace;font-size:16px;line-height:1.9;color:var(--ink2);user-select:none;word-break:break-all}
+.ch{transition:color .08s}
+.ch.ok{color:var(--p1);font-weight:500}
+.ch.bad{color:var(--p3);background:rgba(255,88,88,.08);border-radius:3px}
+.ch.cur{border-bottom:2.5px solid var(--p1);color:var(--ink);animation:cblink2 .75s infinite}
+@keyframes cblink2{0%,100%{border-color:var(--p1)}50%{border-color:transparent}}
+
+.inp-card{background:var(--white);border:1.5px solid var(--border);border-radius:20px;padding:20px 22px;margin-bottom:14px;box-shadow:var(--shadow);transition:border-color .25s,box-shadow .25s}
+.inp-card:focus-within{border-color:var(--p1);box-shadow:0 0 0 4px rgba(108,99,255,.08),var(--shadow)}
+.inp-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+textarea{width:100%;background:transparent;border:none;outline:none;font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--ink);resize:none;height:86px;line-height:1.7}
+textarea::placeholder{color:#c4c4d8}
+textarea:disabled{opacity:.4;cursor:not-allowed}
+
+.act-row{display:flex;gap:12px}
+.btn-t{flex:1;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:14px;border:none;font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all .22s}
+.btn-t:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+.btn-start-t{background:var(--grad1);color:#fff;box-shadow:0 6px 24px rgba(108,99,255,.3)}
+.btn-start-t:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 34px rgba(108,99,255,.48)}
+.btn-finish-t{background:var(--grad2);color:#fff;box-shadow:0 6px 24px rgba(0,201,167,.25)}
+.btn-finish-t:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 34px rgba(0,201,167,.42)}
+.btn-rst-t{flex:0 0 52px;background:var(--white);border:1.5px solid var(--border);color:var(--muted);font-size:20px}
+.btn-rst-t:hover:not(:disabled){border-color:var(--p1);color:var(--p1)}
+
+/* ═══ PAGE 3: RESULT ═══ */
+#page-result{justify-content:flex-start;padding-bottom:80px}
+.res-wrap{width:100%;max-width:680px;padding:0 24px 40px;position:relative;z-index:2;text-align:center}
+
+.cnf-box{position:fixed;inset:0;pointer-events:none;z-index:200}
+.cnf-p{position:absolute;border-radius:3px;animation:cnf linear forwards}
+@keyframes cnf{0%{opacity:1;transform:translateY(-10px) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(900deg)}}
+
+.res-verdict{font-size:clamp(42px,8vw,72px);font-weight:900;letter-spacing:-2px;line-height:1;margin:10px 0 8px}
+.res-verdict.win{background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.res-verdict.lose{background:var(--grad3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.res-sub{font-size:16px;color:var(--muted);margin-bottom:34px}
+
+.donut-wrap{display:flex;justify-content:center;margin-bottom:34px;animation:popIn .6s .2s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes popIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+.donut{position:relative;width:170px;height:170px}
+.donut svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.d-bg{fill:none;stroke:var(--bg2);stroke-width:10}
+.d-fill{fill:none;stroke-width:10;stroke-linecap:round;stroke-dasharray:503;stroke-dashoffset:503;transition:stroke-dashoffset 1.6s cubic-bezier(.34,1.1,.64,1)}
+.d-fill.win-r{stroke:url(#wg)}
+.d-fill.lose-r{stroke:url(#lg)}
+.donut-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.d-num{font-size:44px;font-weight:900;line-height:1;color:var(--ink)}
+.d-unit{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
+
+.res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px}
+.rg{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:20px 12px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.rg::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:50%;height:2px}
+.rg:nth-child(1)::before{background:var(--grad1)}
+.rg:nth-child(2)::before{background:var(--grad2)}
+.rg:nth-child(3)::before{background:var(--grad3)}
+.rg-ico{font-size:22px;margin-bottom:8px}
+.rg-val{font-size:30px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.rg-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px}
+
+.perf{display:inline-flex;align-items:center;gap:14px;background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:16px 24px;margin-bottom:30px;box-shadow:var(--shadow);text-align:left}
+.perf-em{font-size:32px}
+.perf-ttl{font-size:16px;font-weight:700;color:var(--ink)}
+.perf-d{font-size:13px;color:var(--muted);margin-top:2px}
+
+.res-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-res{display:flex;align-items:center;gap:8px;padding:15px 30px;border-radius:14px;border:none;font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all .22s}
+.btn-res-m{background:var(--grad1);color:#fff;box-shadow:0 6px 24px rgba(108,99,255,.3)}
+.btn-res-m:hover{transform:translateY(-2px);box-shadow:0 10px 34px rgba(108,99,255,.48)}
+.btn-res-g{background:var(--white);color:var(--ink2);border:1.5px solid var(--border)}
+.btn-res-g:hover{border-color:var(--p1);color:var(--p1)}
+
+/* Fade animations */
+.au{animation:au .55s ease both}
+@keyframes au{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}.d4{animation-delay:.2s}.d5{animation-delay:.25s}
+
+/* Mobile */
+@media(max-width:780px){
+  .hero{grid-template-columns:1fr;min-height:auto;padding:20px 0;gap:28px}
+  .hero-right{order:-1}
+  .feat-grid{grid-template-columns:1fr}
+  .lstat-bar{grid-template-columns:repeat(2,1fr)}
+  .res-grid{grid-template-columns:1fr}
+}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+</style>
+</head>
+<body>
+
+<!-- ████ PAGE 1: HOME ████ -->
+<div id="pg-home" class="page active">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">⌨</div>
+      Typing Speed Tester
+    </div>
+    <button class="nav-pill" onclick="goTest()">Start Test →</button>
+  </nav>
+
+  <div class="home-inner">
+    <div class="hero">
+      <!-- Left -->
+      <div class="hero-left">
+        <div class="hero-tag"><div class="tag-dot"></div>⚡ Speed &amp; Accuracy</div>
+        <h1 class="hero-h1">
+          How Fast<br>Can You<br>
+          <span class="grad-text">Really Type?</span>
+        </h1>
+        <p class="hero-p">Measure your words per minute, track your accuracy, and discover your true typing potential with real-time feedback.</p>
+        <div class="hero-btns">
+          <button class="btn-main" onclick="goTest()">Start Typing Test <span style="font-size:18px">→</span></button>
+          <button class="btn-ghost" onclick="document.querySelector('.features').scrollIntoView({behavior:'smooth'})">Learn More ↓</button>
+        </div>
+        <div class="hero-metrics">
+          <div><div class="hm-val">5</div><div class="hm-lbl">Challenges</div></div>
+          <div><div class="hm-val">WPM</div><div class="hm-lbl">Live Tracked</div></div>
+          <div><div class="hm-val">100%</div><div class="hm-lbl">Precision</div></div>
+        </div>
+      </div>
+
+      <!-- HOLOGRAPHIC KEYBOARD -->
+      <div class="hero-right">
+        <div class="kb-scene">
+          <div class="kb-glow"></div>
+          <div class="kb-card" id="kbCard">
+            <div class="kb-screen">
+              <div class="screen-txt" id="kbTxt">The quick brown fox...<span class="kb-cur"></span></div>
+            </div>
+            <div class="kb-rows">
+              <div class="kb-row">
+                <div class="key kn" data-k="Q">Q</div><div class="key kn" data-k="W">W</div><div class="key kn" data-k="E">E</div><div class="key kn" data-k="R">R</div><div class="key kn" data-k="T">T</div><div class="key kn" data-k="Y">Y</div><div class="key kn" data-k="U">U</div><div class="key kn" data-k="I">I</div><div class="key kn" data-k="O">O</div><div class="key kn" data-k="P">P</div>
+              </div>
+              <div class="kb-row">
+                <div class="key kn kw" data-k="A" style="width:46px">A</div><div class="key kn" data-k="S">S</div><div class="key kn" data-k="D">D</div><div class="key kn" data-k="F">F</div><div class="key kn" data-k="G">G</div><div class="key kn" data-k="H">H</div><div class="key kn" data-k="J">J</div><div class="key kn" data-k="K">K</div><div class="key kn" data-k="L">L</div>
+              </div>
+              <div class="kb-row">
+                <div class="key kn kw" style="width:58px;font-size:10px">⇧</div><div class="key kn" data-k="Z">Z</div><div class="key kn" data-k="X">X</div><div class="key kn" data-k="C">C</div><div class="key kn" data-k="V">V</div><div class="key kn" data-k="B">B</div><div class="key kn" data-k="N">N</div><div class="key kn" data-k="M">M</div><div class="key kn kw" style="width:58px;font-size:10px">⌫</div>
+              </div>
+              <div class="kb-row">
+                <div class="key kn" style="width:44px;font-size:10px">⌘</div>
+                <div class="key ksp" style="flex:1"></div>
+                <div class="key kn" style="width:44px;font-size:9px">↵</div>
+              </div>
+            </div>
+            <div class="kb-pts" id="kbPts"></div>
+          </div>
+          <!-- Floating data tags -->
+          <div style="position:absolute;top:-12px;right:-12px;background:white;border-radius:12px;padding:10px 14px;box-shadow:0 8px 24px rgba(108,99,255,.18);border:1.5px solid var(--border);animation:tagFloat1 4s ease-in-out infinite;z-index:5">
+            <div style="font-size:18px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1">78</div>
+            <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">WPM</div>
+          </div>
+          <div style="position:absolute;bottom:10px;left:-16px;background:white;border-radius:12px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,201,167,.18);border:1.5px solid var(--border);animation:tagFloat2 5s ease-in-out infinite;z-index:5">
+            <div style="font-size:18px;font-weight:900;color:var(--p4);line-height:1">98%</div>
+            <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Accuracy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="features">
+      <div class="sec-label">Why Use Us</div>
+      <h2 class="sec-title">Everything You Need to<br><span class="grad-text">Master Typing</span></h2>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-ico">⚡</div>
+          <div class="feat-ttl">Live WPM Tracking</div>
+          <div class="feat-desc">Your words-per-minute updates in real time as you type — instant feedback every keystroke.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-ico">🎯</div>
+          <div class="feat-ttl">Accuracy Scoring</div>
+          <div class="feat-desc">Every character is checked. Get a precise accuracy percentage so you know exactly where you stand.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-ico">🏆</div>
+          <div class="feat-ttl">Performance Ratings</div>
+          <div class="feat-desc">From Beginner to Speed Demon — earn a badge based on your WPM and accuracy after each test.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████ PAGE 2: TEST ████ -->
+<div id="pg-test" class="page">
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <nav class="nav">
+    <div class="nav-logo"><div class="nav-logo-icon">⌨</div>Typing Speed Tester</div>
+    <button class="nav-back" onclick="goHome()">← Back to Home</button>
+  </nav>
+
+  <div class="test-wrap">
+    <div class="diff-bar au">
+      <button class="dtab on" onclick="setDiff(0,this)">🟢 Easy</button>
+      <button class="dtab" onclick="setDiff(1,this)">🟡 Medium</button>
+      <button class="dtab" onclick="setDiff(2,this)">🔴 Hard</button>
+    </div>
+    <div class="lstat-bar au d1">
+      <div class="ls" id="ls0"><div class="lsv" id="lv0">0.0</div><div class="lsl">Seconds</div></div>
+      <div class="ls" id="ls1"><div class="lsv" id="lv1">0</div><div class="lsl">WPM</div></div>
+      <div class="ls" id="ls2"><div class="lsv" id="lv2">—</div><div class="lsl">Accuracy</div></div>
+      <div class="ls" id="ls3"><div class="lsv" id="lv3">0%</div><div class="lsl">Progress</div></div>
+    </div>
+    <div class="prog-track au d2"><div class="prog-fill" id="pFill"></div></div>
+    <div class="sent-card au d2">
+      <div class="sent-label">📌 Type this exactly</div>
+      <div class="sent-text" id="sentDisp"></div>
+    </div>
+    <div class="inp-card au d3">
+      <div class="inp-label">⌨ Your Input</div>
+      <textarea id="userInp" placeholder="Press START then begin typing here…" disabled
+        oninput="onType()" onpaste="return false"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+    </div>
+    <div class="act-row au d4">
+      <button class="btn-t btn-start-t" id="bStart" onclick="startTest()">▶ Start Test</button>
+      <button class="btn-t btn-finish-t" id="bDone" onclick="finishTest()" disabled>■ Finish</button>
+      <button class="btn-t btn-rst-t" onclick="resetTest()">↺</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ PAGE 3: RESULT ████ -->
+<div id="pg-result" class="page">
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <div class="cnf-box" id="cnfBox"></div>
+  <nav class="nav">
+    <div class="nav-logo"><div class="nav-logo-icon">⌨</div>Typing Speed Tester</div>
+    <button class="nav-back" onclick="goHome()">← Home</button>
+  </nav>
+
+  <div class="res-wrap">
+    <div class="au" style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Your Result</div>
+    <div class="res-verdict au d1" id="resVerdict"></div>
+    <div class="res-sub au d2" id="resSub"></div>
+
+    <div class="donut-wrap">
+      <div class="donut">
+        <svg viewBox="0 0 170 170">
+          <defs>
+            <linearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#f857a6"/>
+            </linearGradient>
+            <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f9a825"/><stop offset="100%" stop-color="#f857a6"/>
+            </linearGradient>
+          </defs>
+          <circle class="d-bg" cx="85" cy="85" r="80"/>
+          <circle class="d-fill" id="dRing" cx="85" cy="85" r="80"/>
+        </svg>
+        <div class="donut-inner">
+          <div class="d-num" id="dNum">0</div>
+          <div class="d-unit">WPM</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="res-grid au d3">
+      <div class="rg"><div class="rg-ico">⏱</div><div class="rg-val" id="rT">—</div><div class="rg-lbl">Seconds</div></div>
+      <div class="rg"><div class="rg-ico">🔤</div><div class="rg-val" id="rC">—</div><div class="rg-lbl">Characters</div></div>
+      <div class="rg"><div class="rg-ico">🎯</div><div class="rg-val" id="rA">—</div><div class="rg-lbl">Accuracy</div></div>
+    </div>
+
+    <div class="perf au d4">
+      <div class="perf-em" id="pEm"></div>
+      <div><div class="perf-ttl" id="pTtl"></div><div class="perf-d" id="pD"></div></div>
+    </div>
+
+    <div class="res-btns au d5">
+      <button class="btn-res btn-res-m" onclick="reTest()">↺ Test Again</button>
+      <button class="btn-res btn-res-g" onclick="goHome()">🏠 Home</button>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes tagFloat1{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+@keyframes tagFloat2{0%,100%{transform:translateY(0) rotate(1deg)}50%{transform:translateY(-8px) rotate(-1deg)}}
+</style>
+
+<script>
+// DATA
+const DATA={
+  0:["The quick brown fox jumps over the lazy dog.","She sells seashells by the seashore."],
+  1:["Practice makes perfect, so keep on typing every day.","A good keyboard and steady hands improve your speed."],
+  2:["Education is the key to success and opens many doors in life.","Technology is changing the way students learn and grow each day."]
+};
+
+// STATE
+let diff=0,sentence='',t0=null,tiv=null,running=false,res={};
+
+// KEYBOARD ANIMATION
+const kbSeq="THEQUICKBROWNFOX".split('');
+let kbIdx=0;
+function animKb(){
+  document.querySelectorAll('.key').forEach(k=>k.classList.remove('lit'));
+  const L=kbSeq[kbIdx%kbSeq.length];
+  document.querySelectorAll(`.key[data-k="${L}"]`).forEach(k=>k.classList.add('lit'));
+  spawnPt();
+  kbIdx++;
+  setTimeout(animKb,310);
+}
+function spawnPt(){
+  const box=document.getElementById('kbPts');
+  if(!box)return;
+  const p=document.createElement('div');
+  p.className='pt';
+  const colors=['#6c63ff','#f857a6','#00c9a7','#f9a825'];
+  const s=4+Math.random()*5;
+  p.style.cssText=`width:${s}px;height:${s}px;background:${colors[Math.floor(Math.random()*4)]};left:${15+Math.random()*70}%;bottom:${20+Math.random()*30}%;animation-duration:${1.1+Math.random()*.8}s;animation-delay:${Math.random()*.2}s`;
+  box.appendChild(p);
+  setTimeout(()=>p.remove(),2000);
+}
+setTimeout(animKb,600);
+
+// PAGE NAV
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById(id);
+  el.classList.add('active');
+  el.scrollTop=0;
+}
+function goHome(){resetTest(true);show('pg-home')}
+function goTest(){show('pg-test');pickSent()}
+function goResult(){show('pg-result');renderResult()}
+
+// DIFF
+function setDiff(d,btn){
+  if(running)return;
+  diff=d;
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  resetTest(true);pickSent();
+}
+
+// SENTENCE
+function pickSent(){
+  const a=DATA[diff];
+  sentence=a[Math.floor(Math.random()*a.length)];
+  renderSent('');
+}
+function renderSent(typed){
+  const box=document.getElementById('sentDisp');
+  let h='';
+  for(let i=0;i<sentence.length;i++){
+    const ch=sentence[i]===' '?'&nbsp;':sentence[i];
+    if(i<typed.length) h+=`<span class="ch ${typed[i]===sentence[i]?'ok':'bad'}">${ch}</span>`;
+    else if(i===typed.length) h+=`<span class="ch cur">${ch}</span>`;
+    else h+=`<span class="ch">${ch}</span>`;
+  }
+  box.innerHTML=h;
+}
+
+// TYPE
+function onType(){
+  if(!running)return;
+  const typed=document.getElementById('userInp').value;
+  renderSent(typed);
+  const pct=Math.min(100,Math.round(typed.length/sentence.length*100));
+  document.getElementById('pFill').style.width=pct+'%';
+  document.getElementById('lv3').textContent=pct+'%';
+  if(t0){
+    const el=(Date.now()-t0)/1000/60;
+    const wds=typed.trim().split(/\s+/).filter(Boolean).length;
+    document.getElementById('lv1').textContent=el>0?Math.round(wds/el):0;
+  }
+  let ok=0;
+  for(let i=0;i<typed.length;i++) if(typed[i]===sentence[i]) ok++;
+  document.getElementById('lv2').textContent=typed.length>0?Math.round(ok/typed.length*100)+'%':'—';
+  if(typed.length>=sentence.length) finishTest();
+}
+
+// START
+function startTest(){
+  resetDisplay();running=true;t0=Date.now();
+  const inp=document.getElementById('userInp');
+  inp.disabled=false;inp.value='';inp.focus();
+  document.getElementById('bStart').disabled=true;
+  document.getElementById('bDone').disabled=false;
+  document.getElementById('ls0').classList.add('on');
+  tiv=setInterval(()=>{
+    document.getElementById('lv0').textContent=((Date.now()-t0)/1000).toFixed(1);
+  },100);
+  renderSent('');
+}
+
+// FINISH
+function finishTest(){
+  if(!running)return;
+  running=false;clearInterval(tiv);
+  const elapsed=(Date.now()-t0)/1000;
+  const typed=document.getElementById('userInp').value;
+  const isOk=typed.trim()===sentence.trim();
+  let ok=0;
+  for(let i=0;i<typed.length;i++) if(typed[i]===sentence[i]) ok++;
+  const acc=typed.length>0?Math.round(ok/Math.max(typed.length,sentence.length)*100):0;
+  const wpm=Math.round((sentence.trim().split(/\s+/).length/elapsed)*60);
+  res={elapsed,typed,isOk,acc,wpm};
+  document.getElementById('userInp').disabled=true;
+  document.getElementById('bDone').disabled=true;
+  setTimeout(goResult,350);
+}
+
+// RESET
+function resetTest(silent=false){
+  if(!silent&&running)clearInterval(tiv);
+  running=false;t0=null;clearInterval(tiv);
+  const inp=document.getElementById('userInp');
+  inp.value='';inp.disabled=true;
+  document.getElementById('bStart').disabled=false;
+  document.getElementById('bDone').disabled=true;
+  document.getElementById('ls0').classList.remove('on');
+  resetDisplay();
+  if(!silent) pickSent(); else renderSent('');
+}
+function resetDisplay(){
+  document.getElementById('lv0').textContent='0.0';
+  document.getElementById('lv1').textContent='0';
+  document.getElementById('lv2').textContent='—';
+  document.getElementById('lv3').textContent='0%';
+  document.getElementById('pFill').style.width='0%';
+}
+function reTest(){
+  document.getElementById('cnfBox').innerHTML='';
+  resetTest(true);
+  show('pg-test');
+}
+
+// RESULT
+function renderResult(){
+  const{elapsed,isOk,acc,wpm}=res;
+  const v=document.getElementById('resVerdict');
+  v.textContent=isOk?'Perfect! 🎉':'Not Quite ✗';
+  v.className='res-verdict au d1 '+(isOk?'win':'lose');
+  document.getElementById('resSub').textContent=isOk
+    ?`Completed in ${elapsed.toFixed(1)}s — excellent!`
+    :`Finished in ${elapsed.toFixed(1)}s — practice makes perfect!`;
+  document.getElementById('rT').textContent=elapsed.toFixed(1)+'s';
+  document.getElementById('rC').textContent=res.typed.length;
+  document.getElementById('rA').textContent=acc+'%';
+  const w=isFinite(wpm)?wpm:0;
+  document.getElementById('dNum').textContent=w;
+  const ring=document.getElementById('dRing');
+  ring.className='d-fill '+(isOk?'win-r':'lose-r');
+  const ratio=Math.min(w/120,1);
+  setTimeout(()=>{ring.style.strokeDashoffset=503-(ratio*503);},200);
+  let em,ttl,d;
+  if(!isOk){em='📝';ttl='Keep Practicing';d='Focus on accuracy — speed follows!'}
+  else if(w>=80){em='🚀';ttl='Speed Demon!';d='Faster than 95% of typists — wow!'}
+  else if(w>=50){em='⚡';ttl='Fast Typist!';d='Above average speed — impressive!'}
+  else if(w>=30){em='👍';ttl='Good Effort!';d='Building great habits — keep going!'}
+  else{em='🌱';ttl='Just Starting!';d='Every expert was once a beginner!'}
+  document.getElementById('pEm').textContent=em;
+  document.getElementById('pTtl').textContent=ttl;
+  document.getElementById('pD').textContent=d;
+  if(isOk) confetti();
+}
+
+// CONFETTI
+function confetti(){
+  const box=document.getElementById('cnfBox');
+  box.innerHTML='';
+  const cols=['#6c63ff','#f857a6','#00c9a7','#f9a825','#ff5858','#60a5fa'];
+  for(let i=0;i<80;i++){
+    const p=document.createElement('div');
+    p.className='cnf-p';
+    const s=5+Math.random()*10;
+    p.style.cssText=`left:${Math.random()*100}%;width:${s}px;height:${s}px;background:${cols[Math.floor(Math.random()*6)]};border-radius:${Math.random()>.5?'50%':'3px'};animation-duration:${1.6+Math.random()*2.2}s;animation-delay:${Math.random()*1}s`;
+    box.appendChild(p);
+  }
+  setTimeout(()=>box.innerHTML='',6000);
+}
+
+// INIT
+pickSent();
+</script>
+</body>
+</html>
